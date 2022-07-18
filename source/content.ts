@@ -2,9 +2,9 @@ import $ from 'jquery'
 import browser from 'webextension-polyfill'
 import ClickEvent = JQuery.ClickEvent
 
-const InitialisationTimeoutMs = 500
+const initialisationTimeoutMs = 500
 
-const ImageContainer = $('<div>').addClass('sig-image-container')
+const imageContainer = $('<div>').addClass('sig-image-container')
 
 function download(url: string): (event: ClickEvent) => void {
 	return (event: ClickEvent) => {
@@ -23,7 +23,7 @@ function download(url: string): (event: ClickEvent) => void {
 function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
 	storyContent
 		.find<HTMLImageElement>('img')
-		.wrap(ImageContainer)
+		.wrap(imageContainer)
 		.after(function () {
 			const link = $('<a>')
 				.addClass('sig-image-download-link')
@@ -45,8 +45,8 @@ function init() {
 		console.debug('Found story content.')
 		addImageLinks(storyContent)
 	} else {
-		console.debug(`Did not find story content. Waiting ${InitialisationTimeoutMs}ms.`)
-		setTimeout(init, InitialisationTimeoutMs)
+		console.debug(`Did not find story content. Waiting ${initialisationTimeoutMs}ms.`)
+		setTimeout(init, initialisationTimeoutMs)
 	}
 }
 

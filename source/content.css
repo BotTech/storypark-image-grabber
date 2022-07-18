@@ -1,8 +1,10 @@
-#text-notice {
-	position: fixed;
-	bottom: 10px;
+.sig-image-container {
+	position: relative;
+}
+
+.sig-image-download-link {
+	position: absolute;
+	top: 10px;
 	right: 10px;
-	padding: 10px;
-	background: #fff;
-	z-index: 999999;
+	background-color: #fff;
 }

@@ -3,8 +3,11 @@ import browser from 'webextension-polyfill'
 
 const imageContainer = $('<div>').addClass('sig-image-container')
 
-function download(url: string): () => void {
-	return () => browser.runtime.sendMessage({"url": url})
+function download(url: string): (e: MouseEvent) => void {
+	return (e: MouseEvent) => {
+		e.preventDefault()
+		browser.runtime.sendMessage({"url": url})
+	}
 }
 
 function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
@@ -13,9 +16,8 @@ function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
 		.after(function () {
 			return $('<a>')
 				.addClass('sig-image-download-link')
-				//.attr('target', '_blank')
-				//.attr('href', $(this).attr('src'))
-				.text('Download')
+				.attr('href', $(this).attr('src'))
+				.text('\u2913')
 				.on('click', download($(this).attr('src')))
 		})
 }

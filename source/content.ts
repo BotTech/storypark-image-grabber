@@ -1,36 +1,52 @@
 import $ from 'jquery'
 import browser from 'webextension-polyfill'
+import ClickEvent = JQuery.ClickEvent
 
-const imageContainer = $('<div>').addClass('sig-image-container')
+const InitialisationTimeoutMs = 500
 
-function download(url: string): (e: MouseEvent) => void {
-	return (e: MouseEvent) => {
-		e.preventDefault()
-		browser.runtime.sendMessage({"url": url})
+const ImageContainer = $('<div>').addClass('sig-image-container')
+
+function download(url: string): (event: ClickEvent) => void {
+	return (event: ClickEvent) => {
+		event.preventDefault()
+		console.debug(`Downloading: ${url}`)
+		browser.runtime.sendMessage({url}).then(
+			() => {
+				console.debug(`Finished downloading: ${url}`)
+			},
+			error => {
+				console.error(`Failed to download: ${url}`, error)
+			})
 	}
 }
 
 function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
-	storyContent.find<HTMLImageElement>('img')
-		.wrap(imageContainer)
+	storyContent
+		.find<HTMLImageElement>('img')
+		.wrap(ImageContainer)
 		.after(function () {
-			return $('<a>')
+			const link = $('<a>')
 				.addClass('sig-image-download-link')
-				.attr('href', $(this).attr('src'))
+				.attr('href', $(this).attr('src') ?? null)
 				.text('\u2913')
-				.on('click', download($(this).attr('src')))
+			const url = $(this).attr('src')
+			if (url !== undefined) {
+				return link.on('click', download(url))
+			}
+
+			return link
 		})
 }
 
 function init() {
-	console.debug('Initializing...')
+	console.debug('Initializing.')
 	const storyContent = $<HTMLDivElement>('#story-content')
-	if (storyContent.length >= 1) {
+	if (storyContent.length > 0) {
 		console.debug('Found story content.')
 		addImageLinks(storyContent)
 	} else {
-		console.debug('Did not find story content. Waiting...')
-		setTimeout(init, 500)
+		console.debug(`Did not find story content. Waiting ${InitialisationTimeoutMs}ms.`)
+		setTimeout(init, InitialisationTimeoutMs)
 	}
 }
 

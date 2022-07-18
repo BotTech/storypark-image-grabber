@@ -1,14 +1,18 @@
 import browser from 'webextension-polyfill'
 
-function listen(message) {
-	if ('url' in message) {
+function isUrlMessage(message: any): message is {url: string} {
+	return typeof message.url === 'string'
+}
+
+function listen(message: any): Promise<any> | void {
+	if (isUrlMessage(message)) {
 		return browser.downloads.download({
 			url: message.url,
 			conflictAction: 'uniquify'
-		});
-	} else {
-		console.error('Unexpected message:', message)
+		})
 	}
+
+	console.error('Unexpected message:', message)
 }
 
-browser.runtime.onMessage.addListener(listen);
+browser.runtime.onMessage.addListener(listen)

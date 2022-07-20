@@ -1,6 +1,6 @@
 {
   "name": "Storypark Image Grabber",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A browser extension that adds a link to download your child's photos from Storypark.",
   "homepage_url": "https://github.com/BotTech/storypark-image-grabber",
   "manifest_version": 2,

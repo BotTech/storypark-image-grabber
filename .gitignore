@@ -401,4 +401,5 @@ $RECYCLE.BIN/
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,intellij+all,visualstudiocode,vim,emacs,node
 
 
-distribution
+distribution/
+web-ext-artifacts/

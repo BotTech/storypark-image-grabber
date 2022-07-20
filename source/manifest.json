@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "description": "A browser extension that adds a link to download your child's photos from Storypark.",
   "homepage_url": "https://github.com/BotTech/storypark-image-grabber",
-  "manifest_version": 3,
+  "manifest_version": 2,
   "minimum_chrome_version": "100",
   "browser_specific_settings": {
 	"gecko": {
@@ -33,7 +33,7 @@
 	}
   ],
   "background": {
-	"service_worker": "background.ts",
-	"type": "module"
+	"scripts": ["background.ts"],
+	"persistent": false
   }
 }

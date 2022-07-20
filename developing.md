@@ -5,6 +5,9 @@ This was created from https://github.com/fregante/browser-extension-template.
 ## Features
 
 - Uses Manifest v3 ([not yet compatible with Firefox](https://bugzilla.mozilla.org/show_bug.cgi?id=1578284))
+
+  > ℹ️ Use the `firefox` branch for a workaround.
+
 - Use npm dependencies thanks to Parcel 2.
 - Use modern promise-based `browser.*` APIs [webextension-polyfill][link-webext-polyfill].
 - [Auto-syncing options](#auto-syncing-options).

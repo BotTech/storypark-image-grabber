@@ -22,11 +22,18 @@ The build step will create the `distribution` folder, this folder will contain t
 
 ### 🏃 Run the extension
 
-Using [web-ext](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/) is recommened for automatic reloading and running in a dedicated browser instance. Alternatively you can load the extension manually (see below).
+Using [web-ext](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/) is recommended for
+automatic reloading and running in a dedicated browser instance. Alternatively you can load the extension manually (see below).
 
 1. Run `npm run watch` to watch for file changes and build continuously
 1. In another terminal, run `npx web-ext run -t chromium`
 1. Check that the extension is loaded by opening the extension options ([in Firefox](media/extension_options_firefox.png) or [in Chrome](media/extension_options_chrome.png)).
+
+### 📦 Packaging
+
+You can package the extension manually by running `npm run package`.
+
+> ℹ️ This uses the version number in the manifest which is different to the Release Workflow which uses the current UTC date time.
 
 #### Manually
 

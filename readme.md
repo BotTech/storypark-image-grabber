@@ -1,6 +1,6 @@
 # Storypark Image Grabber
 
-A browser extension that adds a button to download your child's photos from [Storypark].
+A browser extension that adds a link to download your child's photos from [Storypark].
 
 ## Developing
 

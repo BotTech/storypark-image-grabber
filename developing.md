@@ -25,7 +25,7 @@ The build step will create the `distribution` folder, this folder will contain t
 Using [web-ext](https://extensionworkshop.com/documentation/develop/getting-started-with-web-ext/) is recommened for automatic reloading and running in a dedicated browser instance. Alternatively you can load the extension manually (see below).
 
 1. Run `npm run watch` to watch for file changes and build continuously
-1. In another terminal, run `web-ext run -t chromium`
+1. In another terminal, run `npx web-ext run -t chromium`
 1. Check that the extension is loaded by opening the extension options ([in Firefox](media/extension_options_firefox.png) or [in Chrome](media/extension_options_chrome.png)).
 
 #### Manually

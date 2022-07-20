@@ -3,11 +3,14 @@
   "scripts": {
     "build": "parcel build source/manifest.json --no-content-hash --no-source-maps --dist-dir distribution --no-cache --detailed-report 0",
     "check": "tsc --noEmit",
-    "lint": "run-p lint:*",
+	"clean": "rm -rf distribution web-ext-artifacts",
+	"lint": "run-p lint:*",
     "lint-fix": "run-p 'lint:* -- --fix'",
     "lint:css": "stylelint source/**/*.css",
     "lint:js": "xo",
-    "test": "run-p check lint:* build",
+	"package": "run-s build package:build",
+	"package:build": "web-ext build --overwrite-dest",
+	"test": "run-p check lint:* build",
     "watch": "parcel watch source/manifest.json --dist-dir distribution --no-cache --no-hmr"
   },
   "browserslist": [

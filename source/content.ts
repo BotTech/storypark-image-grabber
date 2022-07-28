@@ -4,8 +4,6 @@ import ClickEvent = JQuery.ClickEvent
 
 const imageContainer = $('<div>').addClass('sig-image-container')
 
-const postQueryRegex = /[?&]community_post_id=(\d+)(&|$)/
-
 function download(url: string): (event: ClickEvent) => void {
 	return (event: ClickEvent) => {
 		event.preventDefault()
@@ -20,8 +18,9 @@ function download(url: string): (event: ClickEvent) => void {
 	}
 }
 
-function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
-	storyContent
+function addImageLinks(storyContent: HTMLElement) {
+	// TODO: Make this idempotent
+	$(storyContent)
 		.find<HTMLImageElement>('img')
 		.wrap(imageContainer)
 		.after(function () {
@@ -38,55 +37,99 @@ function addImageLinks(storyContent: JQuery<HTMLDivElement>) {
 		})
 }
 
-function onStoryChange() {
-	console.debug('Story changed.')
-	// This should always be on the page even before the content is loaded.
-	const showPostElement = $<HTMLDivElement>('#show-post')
-	if (showPostElement.length === 0) {
-		throw 'Unable to find #show-post element.'
-	}
-	const storyContent = $<HTMLDivElement>('#story-content')
-	if (storyContent.length > 0) {
-		console.debug('Found story content.')
-		addImageLinks(storyContent)
+function addOpenInTabLink(contentContainer: HTMLement) {
+	// TODO: Make this idempotent
+}
+
+function whenElementLoads<TElement = HTMLElement>(
+	root: Node,
+	find: () => JQuery<TElement>,
+	f: (element: TElement) => void): void {
+	const result = find()
+	if (result.length > 0) {
+		f(result[0])
 	} else {
-		console.debug('Story content has not been loaded yet.')
 		const observer = new MutationObserver((mutations, observer) => {
-			const storyContent = $<HTMLDivElement>('#story-content')
-			if (storyContent.length > 0) {
-				console.debug('Found story content.')
+			const result = find()
+			if (result.length > 0) {
 				observer.disconnect()
-				addImageLinks(storyContent)
+				f(result[0])
 			}
 		});
-		observer.observe(showPostElement[0], { childList: true, subtree: true });
+		observer.observe(root, { childList: true, subtree: true });
 	}
+}
+
+let storyContentObserver: MutationObserver | null = null
+
+function observeNewStoryContent() {
+	$('#show-post').find<HTMLDivElement>('#story-content').get().forEach(addImageLinks)
+	function containerLoaded(container: HTMLDivElement) {
+		if (storyContentObserver !== null) storyContentObserver.disconnect()
+		storyContentObserver = new MutationObserver((mutations) => {
+			mutations.forEach(mutation => {
+				mutation.addedNodes.forEach(node => {
+					if (node instanceof HTMLElement) {
+						$(node).filter('#story-content').get().forEach(addImageLinks)
+					}
+				})
+			})
+		});
+		storyContentObserver.observe(container, { childList: true, subtree: true });
+	}
+	whenElementLoads<HTMLDivElement>(document, () => $('#show-post'), containerLoaded)
+}
+
+let mainPostObserver: MutationObserver | null = null
+
+function observeNewMainPosts() {
+	$('#content-container').find('.post').get().forEach(addOpenInTabLink)
+	function containerLoaded(container: HTMLDivElement) {
+		mainPostObserver?.disconnect()
+		mainPostObserver = new MutationObserver((mutations) => {
+
+		});
+		mainPostObserver.observe(container, { childList: true, subtree: true });
+	}
+	whenElementLoads<HTMLDivElement>(document, () => $('#content-container'), containerLoaded)
+}
+
+function observeActivityPage() {
+	observeNewStoryContent()
+	observeNewMainPosts()
+}
+
+function removeObservers() {
+	storyContentObserver?.disconnect()
+	mainPostObserver?.disconnect()
 }
 
 function onPageChange() {
 	console.debug('Page changed.')
+	removeObservers()
 	const pathSegments = window.location.pathname.split('/').filter(segment => segment.length !== 0)
 	if (pathSegments[0] === 'activity') {
 		console.debug('Activity page detected.')
-		if (postQueryRegex.test(window.location.search)) {
-			onStoryChange()
-		}
+		observeActivityPage()
 	} else {
 		console.debug('Unknown page:', window.location)
 	}
 }
 
-function onLoad() {
-	var location: string = window.location.href
-	onPageChange()
-	const observer = new MutationObserver((mutations, observer) => {
-		if (location !== window.location.href) {
-			location = window.location.href
+function listenForPageChanges() {
+	let location: string = window.location.pathname
+	const observer = new MutationObserver(() => {
+		if (location !== window.location.pathname) {
+			location = window.location.pathname
 			onPageChange()
 		}
 	});
-	console.debug('observing')
 	observer.observe(document, { childList: true, subtree: true });
+}
+
+function onLoad() {
+	onPageChange()
+	listenForPageChanges()
 }
 
 $(onLoad)

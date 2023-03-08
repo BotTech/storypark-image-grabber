@@ -7,11 +7,10 @@ const iconWidth = 21
 const openTabIconPadding = 2 * dropdownArrowMargin + dropdownArrowWidth
 const openTabIconWidth = iconWidth + openTabIconPadding
 
-function addOpenInTabLink(post: HTMLElement): boolean {
-	console.debug("Adding open in tab link to post", post)
-	const postId = $(post).attr('data-post-id') ?? ''
+function addOpenInTabLink(child: HTMLElement, postId: string): boolean {
+	console.debug("Adding open in tab link to post", child)
 	const href = `${window.location.href}?community_post_id=${postId}`
-	const result = $(post)
+	const result = $(child)
 		.find('div.sp-o-flex' as string)
 		.filter(function () {
 			return $(this).children('h1').length > 0
@@ -48,10 +47,11 @@ export function observeNewMainPosts() {
 		onElementsAdded(contentContainer, 'article.post', (posts) => {
 			console.debug("New posts added", posts)
 			posts.forEach((post) => {
+				const postId = $(post).attr('data-post-id') ?? ''
 				// The post gets added but the contents isn't there until a bit later.
 				onElementsAdded(post, '*', (children, observer) => {
 					// Disconnect the observer once we managed to add a link.
-					if (children.find(addOpenInTabLink)) observer.disconnect()
+					if (children.find(child => addOpenInTabLink(child, postId))) observer.disconnect()
 				})
 			})
 		})

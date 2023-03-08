@@ -23,6 +23,7 @@ function addImageLinks(storyContent: HTMLElement) {
 	$(storyContent)
 		.find<HTMLImageElement>('img')
 		.wrap(imageContainer)
+		// Uses an anonymous function rather than a lambda to get this.
 		.after(function () {
 			const link = $('<a>')
 				.addClass('sig-image-download-link')
@@ -45,6 +46,7 @@ function observeStoryContent(showPost: HTMLElement) {
 }
 
 export function observeNewStoryContent() {
+	console.debug("observeNewStoryContent")
 	onElementAdded(document, '#show-post', (showPost) => {
 		onElementRemoved(showPost, () => observeNewStoryContent())
 		observeStoryContent(showPost)

@@ -1,14 +1,14 @@
 import $ from 'jquery'
 
-type FindSelector = Parameters<JQuery['find']>[0]
+type FindSelector<E extends HTMLElement> = JQuery.Selector | Element | E | JQuery<E>
 
 // Disconnects once an element is found.
 // TODO: Optimise this when the selector is a local selector and can be used with $.is().
-export function onElementAdded<TElement extends Element = HTMLElement>(
+export function onElementAdded<TElement extends HTMLElement = HTMLElement>(
 	root: Node,
-	selector: FindSelector,
+	selector: FindSelector<TElement>,
 	f: (element: TElement) => void): void {
-	const find = () => $(root).find(selector)
+	const find = () => $(root).find<TElement>(selector)
 	const existingElement = find()
 	if (existingElement.length > 0) {
 		f(existingElement[0])
@@ -26,30 +26,35 @@ export function onElementAdded<TElement extends Element = HTMLElement>(
 
 // Stays connected forever.
 // TODO: Optimise this when the selector is a local selector and can be used with $.is().
-export function onElementsAdded<TElement extends Element = HTMLElement>(
+export function onElementsAdded<TElement extends HTMLElement = HTMLElement>(
 	root: Node,
-	selector: FindSelector,
-	f: (elements: TElement[]) => void): void {
-	const find: () => JQuery<TElement> = () => $(root).find(selector)
-	const existingElements = find()
-	if (existingElements.length > 0) {
-		f(existingElements.get())
-	}
+	selector: FindSelector<TElement>,
+	f: (elements: TElement[], observer: MutationObserver) => void): void {
+	console.debug("Observing added elements that match selector", selector)
+	const find: () => JQuery<TElement> = () => $(root).find<TElement>(selector)
 	const observer = new MutationObserver((mutations, observer) => {
-		const results = new Set(find().get())
-		const matches = []
+		// The selector might not be a local selector so we get all the matching elements and then find the intersection
+		// of that and the added nodes.
+		const currentElements = new Set<HTMLElement>(find().get())
+		const addedElements: TElement[] = []
 		mutations.forEach((mutation) => {
 			mutation.addedNodes.forEach((node) => {
-				if (node instanceof Element && results.has(node)) {
-					matches.push(node)
+				if (node instanceof HTMLElement && currentElements.has(node)) {
+					addedElements.push(node as TElement)
 				}
 			})
 		})
-		if (matches.length > 0) {
-			f(matches)
+		console.debug("Added elements", addedElements)
+		if (addedElements.length > 0) {
+			f(addedElements, observer)
 		}
 	});
 	observer.observe(root, {childList: true, subtree: true});
+	const existingElements = find()
+	console.debug("Existing elements", existingElements)
+	if (existingElements.length > 0) {
+		f(existingElements.get(), observer)
+	}
 }
 
 export function onElementRemoved<TElement extends Element = HTMLElement>(

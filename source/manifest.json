@@ -8,7 +8,7 @@
   "browser_specific_settings": {
 	"gecko": {
 	  "id": "storypark-image-grabber@bottech.co.nz",
-	  "strict_min_version": "100.0"
+	  "strict_min_version": "112.0"
 	}
   },
   "icons": {

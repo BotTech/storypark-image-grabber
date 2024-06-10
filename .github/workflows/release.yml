@@ -52,10 +52,10 @@ jobs:
         run: |
           case ${{ matrix.command }} in
             chrome)
-              cd $DIRECTORY && npx chrome-webstore-upload-cli@2 upload --auto-publish
+              cd $DIRECTORY && npx chrome-webstore-upload-cli@3
               ;;
             firefox)
-              cd $DIRECTORY && npx web-ext-submit@6
+              cd $DIRECTORY && npx web-ext@8 sign --use-submission-api --channel listed
               ;;
           esac
         env:

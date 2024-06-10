@@ -8,6 +8,7 @@
     "lint-fix": "run-p 'lint:* -- --fix'",
     "lint:css": "stylelint source/**/*.css",
     "lint:js": "xo",
+	"lint:web-ext": "web-ext lint",
     "package": "run-s clean build package:build",
     "package:build": "web-ext build --overwrite-dest",
     "test": "run-p check lint:* build",

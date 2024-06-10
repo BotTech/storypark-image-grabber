@@ -3,6 +3,7 @@ module.exports = {
 	semicolon: false,
 	rules: {
 		'comma-dangle': ['error', 'never'],
+		'import/extensions': ['error', 'never'],
 		'@typescript-eslint/comma-dangle': ['error', 'never']
 	}
 }

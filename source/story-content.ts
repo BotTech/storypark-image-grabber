@@ -1,10 +1,10 @@
 import $ from 'jquery'
 import browser from 'webextension-polyfill'
-import {onElementAdded, onElementRemoved, onElementsAdded} from "./observation";
-import ClickEvent = JQuery.ClickEvent;
+import {onElementAdded, onElementRemoved, onElementsAdded} from './observation'
+import ClickEvent = JQuery.ClickEvent
 
-const linkContainer =
-	$('<div>').addClass('sig-image-container')
+const linkContainer
+	= $('<div>').addClass('sig-image-container')
 
 function download(url: string): (event: ClickEvent) => void {
 	return (event: ClickEvent) => {
@@ -45,31 +45,35 @@ function downloadLink(this: HTMLElement) {
 
 // Old
 function observeStoryContent(showPost: HTMLElement) {
-	onElementAdded(showPost, '#story-content', (storyContent) => {
-		onElementRemoved(storyContent, () => observeStoryContent(showPost))
+	onElementAdded(showPost, '#story-content', storyContent => {
+		onElementRemoved(storyContent, () => {
+			observeStoryContent(showPost)
+		})
 		addImageLinks(storyContent)
 	})
 }
 
 // Old
 export function observeNewStoryContent() {
-	console.debug("observeNewStoryContent")
-	onElementAdded(document, '#show-post', (showPost) => {
-		onElementRemoved(showPost, () => observeNewStoryContent())
+	console.debug('observeNewStoryContent')
+	onElementAdded(document, '#show-post', showPost => {
+		onElementRemoved(showPost, () => {
+			observeNewStoryContent()
+		})
 		observeStoryContent(showPost)
 	})
 }
 
 function observeContainerImages(child: HTMLElement) {
-	console.debug("observeContainerImages")
-	onElementsAdded(child, '.image-container > img', (image) => {
+	console.debug('observeContainerImages')
+	onElementsAdded(child, '.image-container > img', image => {
 		$(image).after(downloadLink)
 	})
 }
 
 function observeVideos(child: HTMLElement) {
-	console.debug("observeVideos")
-	onElementsAdded(child, 'video', (video) => {
+	console.debug('observeVideos')
+	onElementsAdded(child, 'video', video => {
 		$(video)
 			.wrap(linkContainer)
 			.after(downloadLink)
@@ -77,9 +81,11 @@ function observeVideos(child: HTMLElement) {
 }
 
 export function observeMain() {
-	console.debug("observeMain")
-	onElementAdded(document, 'main', (main) => {
-		onElementRemoved(main, () => observeMain())
+	console.debug('observeMain')
+	onElementAdded(document, 'main', main => {
+		onElementRemoved(main, () => {
+			observeMain()
+		})
 		observeContainerImages(main)
 		observeVideos(main)
 	})

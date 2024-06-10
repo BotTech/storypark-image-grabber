@@ -7,9 +7,19 @@ const iconWidth = 21
 const openTabIconPadding = 2 * dropdownArrowMargin + dropdownArrowWidth
 const openTabIconWidth = iconWidth + openTabIconPadding
 
-function addOpenInTabLink(child: HTMLElement, postId: string): boolean {
+function postUrl(postId: string, postType: string): string | undefined {
+	switch (postType) {
+		case 'story': return `stories/${postId}`
+		default:
+			console.warn(`Unknown post type: ${postType}`)
+			return undefined
+	}
+}
+
+function addOpenInTabLink(child: HTMLElement, postId: string, postType: string): boolean {
 	console.debug("Adding open in tab link to post", child)
-	const href = `${window.location.href}?community_post_id=${postId}`
+	const url = postUrl(postId, postType)
+	if (url === undefined) return false
 	const result = $(child)
 		.find('div.sp-o-flex' as string)
 		.filter(function () {
@@ -18,7 +28,7 @@ function addOpenInTabLink(child: HTMLElement, postId: string): boolean {
 		.first()
 		.append(function () {
 			return $('<a>')
-				.attr('href', href)
+				.attr('href', url)
 				.attr('target', '_blank')
 				.on('click', function (e) {
 					// Don't let the click event on the div that is the parent of the flex container fire as that will
@@ -48,10 +58,11 @@ export function observeNewMainPosts() {
 			console.debug("New posts added", posts)
 			posts.forEach((post) => {
 				const postId = $(post).attr('data-post-id') ?? ''
+				const postType = $(post).attr('data-type') ?? ''
 				// The post gets added but the contents isn't there until a bit later.
 				onElementsAdded(post, '*', (children, observer) => {
 					// Disconnect the observer once we managed to add a link.
-					if (children.find(child => addOpenInTabLink(child, postId))) observer.disconnect()
+					if (children.find(child => addOpenInTabLink(child, postId, postType))) observer.disconnect()
 				})
 			})
 		})

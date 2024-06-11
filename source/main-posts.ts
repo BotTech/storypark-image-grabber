@@ -62,7 +62,7 @@ function maybeAddOpenInTabLink(child: HTMLElement, postId: string, dataType: Pos
 	return result.length > 0
 }
 
-function observePost(post: HTMLElement, postType: "story") {
+function observePost(post: HTMLElement, postType: 'story') {
 	const postId = $(post).attr('data-post-id') ?? ''
 	const selector = postSelector(postType)
 	// The post gets added but the contents isn't there until a bit later.
@@ -91,7 +91,6 @@ export function observeNewMainPosts() {
 					console.debug(`Ignoring post type: ${postType}`)
 				} else {
 					console.warn(`Unknown post type: ${postType}`)
-					debugger
 				}
 			}
 		})

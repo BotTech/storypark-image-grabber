@@ -93,7 +93,6 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 	root: Node,
 	selector: FindSelector<Element>,
 	f: (elements: Element[], observer: MutationObserver) => void): void {
-	//console.debug('Observing added elements that match selector', selector)
 	// This is a bit hacky but will work so long as we remember to include spaces in any descendent selectors.
 	const isLocal = isLocalSelector(selector)
 	const find: () => JQuery<Element> = () => $(root).find<Element>(selector)
@@ -119,7 +118,6 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 		}
 
 		if (addedElements.length > 0) {
-			//console.debug('Added elements', addedElements)
 			f(addedElements, observer)
 		}
 	})
@@ -127,7 +125,6 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 	const existingElements = find()
 	if (existingElements.length > 0) {
 		const elements = existingElements.get()
-		//console.debug('Existing elements', elements)
 		f(elements, observer)
 	}
 }

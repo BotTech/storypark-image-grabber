@@ -6,7 +6,6 @@ function onLoad() {
 	console.debug('onLoad')
 	observeNewStoryContent()
 	observeNewMainPosts()
-	// TODO: Maybe this should only be added on the story page?
 	observeStoryMain()
 }
 

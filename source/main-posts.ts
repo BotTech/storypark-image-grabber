@@ -7,25 +7,33 @@ const iconWidth = 21
 const openTabIconPadding = (2 * dropdownArrowMargin) + dropdownArrowWidth
 const openTabIconWidth = iconWidth + openTabIconPadding
 
-function postUrl(postId: string, postType: string): string | undefined {
-	switch (postType) {
-		case 'story': { return `stories/${postId}`
-		}
+type PostType = 'story'
 
-		default: {
-			console.warn(`Unknown post type: ${postType}`)
-			return undefined
-		}
+function isPostType(postType: string): postType is PostType {
+	return postType === 'story'
+}
+
+type IgnoredPostType = 'community-post'
+
+function isIgnoredPostType(postType: string): postType is IgnoredPostType {
+	return postType === 'community-post'
+}
+
+function postSelector(postType: PostType): string {
+	// This has to be an element that contains div.sp-o-flex h1
+	switch (postType) {
+		case 'story': { return 'a[data-type="story"]' }
 	}
 }
 
-function addOpenInTabLink(child: HTMLElement, postId: string, postType: string): boolean {
-	console.debug('Adding open in tab link to post', child)
-	const url = postUrl(postId, postType)
-	if (url === undefined) {
-		return false
+function postUrl(postId: string, dataType: PostType): string {
+	switch (dataType) {
+		case 'story': { return `stories/${postId}` }
 	}
+}
 
+function maybeAddOpenInTabLink(child: HTMLElement, postId: string, dataType: PostType): boolean {
+	const url = postUrl(postId, dataType)
 	const result = $(child)
 		.find('div.sp-o-flex' as string)
 		.filter(function () {
@@ -54,6 +62,21 @@ function addOpenInTabLink(child: HTMLElement, postId: string, postType: string):
 	return result.length > 0
 }
 
+function observePost(post: HTMLElement, postType: "story") {
+	const postId = $(post).attr('data-post-id') ?? ''
+	const selector = postSelector(postType)
+	// The post gets added but the contents isn't there until a bit later.
+	onElementsAdded(post, selector, (children, observer) => {
+		// Disconnect the observer once we managed to add a link.
+		if (children.some(child => maybeAddOpenInTabLink(child, postId, postType))) {
+			console.debug('Added open in tab link to post.', post)
+			observer.disconnect()
+		} else {
+			console.debug('Unable to add open in tab link to post. Will try again on next change.', post)
+		}
+	})
+}
+
 export function observeNewMainPosts() {
 	console.debug('observeNewMainPosts')
 	onElementAdded(document, '#content-container', contentContainer => {
@@ -61,15 +84,15 @@ export function observeNewMainPosts() {
 		onElementsAdded(contentContainer, 'article.post', posts => {
 			console.debug('New posts added', posts)
 			for (const post of posts) {
-				const postId = $(post).attr('data-post-id') ?? ''
 				const postType = $(post).attr('data-type') ?? ''
-				// The post gets added but the contents isn't there until a bit later.
-				onElementsAdded(post, '*', (children, observer) => {
-					// Disconnect the observer once we managed to add a link.
-					if (children.some(child => addOpenInTabLink(child, postId, postType))) {
-						observer.disconnect()
-					}
-				})
+				if (isPostType(postType)) {
+					observePost(post, postType)
+				} else if (isIgnoredPostType(postType)) {
+					console.debug(`Ignoring post type: ${postType}`)
+				} else {
+					console.warn(`Unknown post type: ${postType}`)
+					debugger
+				}
 			}
 		})
 	})

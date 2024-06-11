@@ -22,33 +22,29 @@ function ignoreElement(element: HTMLElement): boolean {
 	return isSigElement(element) || (element.parentElement !== null && ignoreElement(element.parentElement))
 }
 
-function matchesLocalSelector<Element extends HTMLElement = HTMLElement>(node: Node, selector: FindSelector<Element>): Element[] {
+function localSelectorMatches<Element extends HTMLElement = HTMLElement>(node: Node, selector: FindSelector<Element>): Element[] {
 	const matches: Element[] = []
-	// The addedNodes only contains the parent node. We have to traverse the whole thing to find them all.
 	if (node instanceof HTMLElement && !ignoreElement(node)) {
-		// Check if the added node matches the jQuery selector
 		if ($(node).is(selector)) {
 			matches.push(node as Element)
+		} else {
+			$(node).find(selector).each(function () {
+				matches.push(this)
+			})
 		}
-
-		// Also check if any descendants of the added node match the selector
-		$(node).find(selector).each(function () {
-			matches.push(this)
-		})
 	}
 
 	return matches
 }
 
-function matchesFound<Element extends HTMLElement = HTMLElement>(node: Node, allElements: Set<HTMLElement>): Element[] {
+function elementMatches<Element extends HTMLElement = HTMLElement>(node: Node, allElements: Set<Element>): Element[] {
 	const matches: Element[] = []
-	// The addedNodes only contains the parent node. We have to traverse the whole thing to find them all.
 	if (node instanceof HTMLElement && !ignoreElement(node)) {
-		if (allElements.has(node)) {
+		if (allElements.has(node as Element)) {
 			matches.push(node as Element)
 		} else {
 			$(node).find('*')
-				.filter((i, element) => allElements.has(element))
+				.filter((i, element) => allElements.has(element as Element))
 				.each((i, element) => {
 					matches.push(element as Element)
 				})
@@ -73,9 +69,10 @@ export function onElementAdded<Element extends HTMLElement = HTMLElement>(
 			if (isLocal) {
 				for (const mutation of mutations) {
 					for (const node of mutation.addedNodes) {
-						if (matchesLocalSelector(node, selector)) {
+						const matches = localSelectorMatches(node, selector)
+						if (matches.length > 0) {
 							observer.disconnect()
-							f(node as Element)
+							f(matches[0])
 							return
 						}
 					}
@@ -96,7 +93,7 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 	root: Node,
 	selector: FindSelector<Element>,
 	f: (elements: Element[], observer: MutationObserver) => void): void {
-	console.debug('Observing added elements that match selector', selector)
+	//console.debug('Observing added elements that match selector', selector)
 	// This is a bit hacky but will work so long as we remember to include spaces in any descendent selectors.
 	const isLocal = isLocalSelector(selector)
 	const find: () => JQuery<Element> = () => $(root).find<Element>(selector)
@@ -105,26 +102,24 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 		if (isLocal) {
 			for (const mutation of mutations) {
 				for (const node of mutation.addedNodes) {
-					if (matchesLocalSelector(node, selector)) {
-						addedElements.push(node as Element)
-					}
+					const matches = localSelectorMatches(node, selector)
+					addedElements.push(...matches)
 				}
 			}
 		} else {
-			// The selector might not be a local selector so we get all the matching elements and then find the intersection
+			// The selector is not a local selector, so we get all the matching elements and then find the intersection
 			// of that and the added nodes.
-			const allElements = new Set<HTMLElement>(find().get())
+			const allElements = new Set<Element>(find().get())
 			for (const mutation of mutations) {
 				for (const node of mutation.addedNodes) {
-					if (matchesFound(node, allElements)) {
-						addedElements.push(node as Element)
-					}
+					const matches = elementMatches(node, allElements)
+					addedElements.push(...matches)
 				}
 			}
 		}
 
 		if (addedElements.length > 0) {
-			console.debug('Added elements', addedElements)
+			//console.debug('Added elements', addedElements)
 			f(addedElements, observer)
 		}
 	})
@@ -132,7 +127,7 @@ export function onElementsAdded<Element extends HTMLElement = HTMLElement>(
 	const existingElements = find()
 	if (existingElements.length > 0) {
 		const elements = existingElements.get()
-		console.debug('Existing elements', elements)
+		//console.debug('Existing elements', elements)
 		f(elements, observer)
 	}
 }

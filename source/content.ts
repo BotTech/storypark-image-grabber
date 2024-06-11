@@ -1,15 +1,13 @@
 import $ from 'jquery'
-import {observeMain, observeNewStoryContent} from './story-content'
+import {observeStoryMain, observeNewStoryContent} from './story-content'
 import {observeNewMainPosts} from './main-posts'
 
 function onLoad() {
 	console.debug('onLoad')
-	// OnElementAdded(document, '*', (element) => {
-	// 	console.debug("Added element", element)
-	// })
 	observeNewStoryContent()
 	observeNewMainPosts()
-	observeMain()
+	// TODO: Maybe this should only be added on the story page?
+	observeStoryMain()
 }
 
 $(onLoad)

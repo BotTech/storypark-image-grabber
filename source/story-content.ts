@@ -80,11 +80,11 @@ function observeVideos(child: HTMLElement) {
 	})
 }
 
-export function observeMain() {
+export function observeStoryMain() {
 	console.debug('observeMain')
 	onElementAdded(document, 'main', main => {
 		onElementRemoved(main, () => {
-			observeMain()
+			observeStoryMain()
 		})
 		observeContainerImages(main)
 		observeVideos(main)
